@@ -5,7 +5,8 @@ namespace PantheonSystems\UpstreamManagement;
 use Composer\IO\IOInterface;
 use Composer\Composer;
 
-trait UpstreamManagementTrait {
+trait UpstreamManagementTrait
+{
 
     /**
      * Require that the current project is a custom upstream.
@@ -16,14 +17,15 @@ trait UpstreamManagementTrait {
      * the project name, this is a good hint to spur them to perhaps
      * do that.
      */
-    protected function failUnlessIsCustomUpstream(IOInterface $io, Composer $composer) {
+    protected function failUnlessIsCustomUpstream(IOInterface $io, Composer $composer)
+    {
         $name = $composer->getPackage()->getName();
         $gitRepoUrl = exec('git config --get remote.origin.url');
 
         // Refuse to run if:
         // a) This is a clone of the standard Pantheon upstream, and it hasn't been renamed
         // b) This is an local working copy of a Pantheon site instread of the upstream
-        $isPantheonStandardUpstream = preg_match('#pantheon.*/drupal-composer-managed#', $name); // false = failure, 0 = no match
+        $isPantheonStandardUpstream = preg_match('#pantheon.*/drupal-composer-managed#', $name);
         $isPantheonSite = (strpos($gitRepoUrl, '@codeserver') !== false);
 
         if (!$isPantheonStandardUpstream && !$isPantheonSite) {
@@ -31,13 +33,16 @@ trait UpstreamManagementTrait {
         }
 
         if ($isPantheonStandardUpstream) {
+            // @codingStandardsIgnoreLine
             $io->writeError("<info>The upstream-require command can only be used with a custom upstream. If this is a custom upstream, be sure to change the 'name' item in the top-level composer.json file from $name to something else.</info>");
         }
 
         if ($isPantheonSite) {
+            // @codingStandardsIgnoreLine
             $io->writeError("<info>The upstream-require command cannot be used with Pantheon sites. Only use it with custom upstreams. Your git repo URL is $gitRepoUrl.</info>");
         }
 
+        // @codingStandardsIgnoreLine
         $io->writeError("<info>See https://pantheon.io/docs/create-custom-upstream for information on how to create a custom upstream.</info>" . PHP_EOL);
         throw new \RuntimeException("Cannot use upstream-require command with this project.");
     }
@@ -57,7 +62,8 @@ trait UpstreamManagementTrait {
      * an installation profile), the recommended strategy is to require the
      * profile through the upsream-configuration/composer.json file.
      */
-    protected function ensureCoreRecommended() {
+    protected function ensureCoreRecommended()
+    {
         $projectComposerJsonContents = file_get_contents("composer.json");
         $projectComposerJson = json_decode($projectComposerJsonContents, true);
 
@@ -69,12 +75,16 @@ trait UpstreamManagementTrait {
         $upstreamComposerJsonContents = file_get_contents("upstream-configuration/composer.json");
         $upstreamComposerJson = json_decode($upstreamComposerJsonContents, true);
 
-        if ((isset($upstreamComposerJson['require']['drupal/core-recommended'])) && ($upstreamComposerJson['require']['drupal/core-recommended'] === $projectComposerJson['require']['drupal/core-recommended'])) {
+        if ((isset($upstreamComposerJson['require']['drupal/core-recommended'])) &&
+            ($upstreamComposerJson['require']['drupal/core-recommended'] ===
+                $projectComposerJson['require']['drupal/core-recommended'])
+        ) {
             return;
         }
 
         // Make the version of drupal/core-recommended match the version in the project.
-        $upstreamComposerJson['require']['drupal/core-recommended'] = $projectComposerJson['require']['drupal/core-recommended'];
+        $upstreamComposerJson['require']['drupal/core-recommended'] =
+            $projectComposerJson['require']['drupal/core-recommended'];
 
         $upstreamComposerJsonContents = static::jsonEncodePretty($upstreamComposerJson);
         // @todo Path!?
@@ -89,7 +99,8 @@ trait UpstreamManagementTrait {
      * with the exact versions of all dependencies listed in the upstream-configuration/composer.lock
      * file.
      */
-    protected function generateLockedComposerJson(IOInterface $io) {
+    protected function generateLockedComposerJson(IOInterface $io)
+    {
         // @todo Path!?
         if (!file_exists("upstream-configuration/composer.lock")) {
             $io->writeError("<warning>No locked dependencies in the upstream; skipping.</warning>");
@@ -141,7 +152,8 @@ trait UpstreamManagementTrait {
      * "upstream-configuration/locked", instead of the default directory,
      * "upstream-configuration".
      */
-    protected function useLockedUpstreamDependenciesInProjectComposerJson(IOInterface $io) {
+    protected function useLockedUpstreamDependenciesInProjectComposerJson(IOInterface $io)
+    {
         // @todo Path!?
         if (!file_exists("upstream-configuration/locked/composer.json")) {
             $io->writeError("<warning>Dependencies are not locked in the upstream; skipping.</warning>");
@@ -162,12 +174,13 @@ trait UpstreamManagementTrait {
     /**
      * Do the actual modification of the 'repositories' section of composer.json.
      */
-    protected function updateUpstreamsPathRepo($repositories) {
+    protected function updateUpstreamsPathRepo($repositories)
+    {
         foreach ($repositories as &$repo) {
-        if ($this->isMatchingPathRepo($repo)) {
-            $repo['url'] = 'upstream-configuration/locked';
-            return $repositories;
-        }
+            if ($this->isMatchingPathRepo($repo)) {
+                $repo['url'] = 'upstream-configuration/locked';
+                return $repositories;
+            }
         }
         $repositories[] = [
             'type' => 'path',
@@ -179,7 +192,8 @@ trait UpstreamManagementTrait {
     /**
      * Check to see if the provided repo item is a path repo named 'upstream-configuration'.
      */
-    protected function isMatchingPathRepo($repo) {
+    protected function isMatchingPathRepo($repo)
+    {
         if (!isset($repo['type']) || !isset($repo['url'])) {
             return false;
         }
@@ -197,11 +211,11 @@ trait UpstreamManagementTrait {
      * @return string
      *   The pretty-printed encoded string version of the supplied data.
      */
-    protected function jsonEncodePretty(array $data) {
+    protected function jsonEncodePretty(array $data)
+    {
         $prettyContents = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         $prettyContents = preg_replace('#": \[\s*("[^"]*")\s*\]#m', '": [\1]', $prettyContents);
 
         return $prettyContents;
     }
-
 }

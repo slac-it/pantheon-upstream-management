@@ -10,14 +10,16 @@ use PantheonSystems\UpstreamManagement\UpstreamManagementTrait;
 /**
  * The "upstream:require" command.
  */
-class UpstreamRequireCommand extends BaseCommand {
+class UpstreamRequireCommand extends BaseCommand
+{
 
     use UpstreamManagementTrait;
 
     /**
      * {@inheritdoc}
      */
-    protected function configure() {
+    protected function configure()
+    {
         $this
             ->setName('upstream:require')
             ->setAliases(['upstream-require'])
@@ -28,7 +30,8 @@ class UpstreamRequireCommand extends BaseCommand {
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $output->writeln('Hello World');
         $io = $this->getIO();
         $composer = $this->getComposer();
@@ -39,7 +42,7 @@ class UpstreamRequireCommand extends BaseCommand {
         $hasNoUpdate = array_search('--no-update', $arguments) !== false;
         // Remove --working-dir, --no-update and --no-install, if provided
         $arguments = array_filter($arguments, function ($item) {
-        return
+            return
             (substr($item, 0, 13) != '--working-dir') &&
             ($item != '--no-update') &&
             ($item != '--no-install');
@@ -56,8 +59,7 @@ class UpstreamRequireCommand extends BaseCommand {
 
         if ($addNoUpdate) {
             $args[] = '--no-update';
-        }
-        else {
+        } else {
             $args[] = '--no-install';
         }
 
@@ -72,8 +74,8 @@ class UpstreamRequireCommand extends BaseCommand {
             throw new \RuntimeException("Could not add dependency to upstream.");
         }
 
+        // @codingStandardsIgnoreLine
         $io->writeError('upstream-configuration/composer.json updated. Commit the upstream-configuration/composer.lock file if you wish to lock your upstream dependency versions in sites created from this upstream.');
         return $statusCode;
     }
-
 }

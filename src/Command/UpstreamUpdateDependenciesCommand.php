@@ -10,14 +10,16 @@ use PantheonSystems\UpstreamManagement\UpstreamManagementTrait;
 /**
  * The "upstream:update-dependencies" command.
  */
-class UpdateUpstreamDependenciesCommand extends BaseCommand {
+class UpdateUpstreamDependenciesCommand extends BaseCommand
+{
 
     use UpstreamManagementTrait;
 
     /**
      * {@inheritdoc}
      */
-    protected function configure() {
+    protected function configure()
+    {
         $this
             ->setName('upstream:update-dependencies')
             ->setAliases(['update-upstream-dependencies'])
@@ -28,7 +30,8 @@ class UpdateUpstreamDependenciesCommand extends BaseCommand {
     /**
      * {@inheritdoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $output->writeln('Hello World');
 
         $io = $this->getIO();
@@ -38,7 +41,9 @@ class UpdateUpstreamDependenciesCommand extends BaseCommand {
         $this->failUnlessIsCustomUpstream($io, $composer);
         // @todo Path!?
         if (!file_exists("upstream-configuration/composer.json")) {
-            $io->writeError("Upstream has no dependencies; use 'composer upstream-require drupal/modulename' to add some.");
+            $io->writeError(
+                "Upstream has no dependencies; use 'composer upstream-require drupal/modulename' to add some."
+            );
             return;
         }
 
@@ -59,7 +64,5 @@ class UpdateUpstreamDependenciesCommand extends BaseCommand {
 
         // Change the project (top-level) composer.json to use the locked composer.json file.
         $this->useLockedUpstreamDependenciesInProjectComposerJson($io);
-
     }
-
 }

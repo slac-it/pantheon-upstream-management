@@ -12,7 +12,8 @@ use Composer\IO\IOInterface;
 /**
  * Composer plugin to handle upstream management.
  */
-class UpstreamManagementPlugin implements PluginInterface, Capable {
+class UpstreamManagementPlugin implements PluginInterface, Capable
+{
 
     protected Composer $composer;
     protected IoInterface $io;
@@ -34,7 +35,8 @@ class UpstreamManagementPlugin implements PluginInterface, Capable {
     /**
      * {@inheritdoc}
      */
-    public function getCapabilities() {
+    public function getCapabilities()
+    {
         return [CommandProvider::class => UpstreamManagementCommandProvider::class];
     }
 
