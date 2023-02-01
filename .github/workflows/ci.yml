@@ -65,7 +65,5 @@ jobs:
           ini-values: ${{ matrix.php-ini-values }}
       - name: Install composer
         run: composer install --no-interaction --prefer-dist
-      - name: Install Composer Dependencies for current scenario
-        run: composer scenario ${{ matrix.php-version.php }}
       - name: Functional Tests
         run: composer test
