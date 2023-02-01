@@ -1,0 +1,22 @@
+{
+    "name": "pantheon-systems/upstream-management",
+    "description": "Composer plugin that holds a series of scripts to manage upstreams in Pantheon",
+    "type": "composer-plugin",
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "PantheonSystems\\UpstreamManagement\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Pantheon",
+            "email": "cms-ecosystem@pantheon.io"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
