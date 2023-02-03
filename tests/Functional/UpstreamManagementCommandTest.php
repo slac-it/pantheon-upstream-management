@@ -45,6 +45,11 @@ class UpstreamManagementCommandTest extends TestCase
         // 1. The composer.lock file is created, which is necessary for the upstream dependency locking feature to work.
         // 2. Our preUpdate modifications are applied to the SUT.
         $this->composer('update');
+
+        $this->composer('config', ['minimum-stability', 'dev']);
+        $this->composer('config', ['repositories.upstream', 'path', dirname(__DIR__, 2)]);
+        $this->composer('config', ['--no-plugins', 'allow-plugins.pantheon-systems/upstream-management', 'true']);
+        $this->composer('require', ['pantheon-systems/upstream-management', '*']);
     }
 
     public function testUpstreamRequire()

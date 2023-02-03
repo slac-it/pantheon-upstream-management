@@ -27,7 +27,7 @@ class UpstreamManagementPlugin implements PluginInterface, Capable, EventSubscri
     public static function getSubscribedEvents()
     {
         return [
-            ScriptEvents::POST_UPDATE_CMD => ['onPostUpdate', 100],
+            ScriptEvents::POST_UPDATE_CMD => ['onPostUpdate', -100],
         ];
     }
 
@@ -43,10 +43,17 @@ class UpstreamManagementPlugin implements PluginInterface, Capable, EventSubscri
             unset($composerJson['scripts-descriptions']['upstream-require']);
         }
         if (isset($composerJson['scripts']['update-upstream-dependencies'])) {
-            unset($composerJson['scripts']['update-upstream-dependenciess']);
+            unset($composerJson['scripts']['update-upstream-dependencies']);
         }
         if (isset($composerJson['scripts-descriptions']['update-upstream-dependencies'])) {
             unset($composerJson['scripts-descriptions']['update-upstream-dependencies']);
+        }
+
+        if (empty($composerJson['scripts'])) {
+            unset($composerJson['scripts']);
+        }
+        if (empty($composerJson['scripts-descriptions'])) {
+            unset($composerJson['scripts-descriptions']);
         }
 
         $composerJsonContents = $this->jsonEncodePretty($composerJson);
