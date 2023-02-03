@@ -64,6 +64,6 @@ jobs:
           coverage: pcov
           ini-values: ${{ matrix.php-ini-values }}
       - name: Install composer
-        run: composer install --no-interaction --prefer-dist
+        run: composer update --no-interaction --prefer-dist
       - name: Functional Tests
         run: composer test
