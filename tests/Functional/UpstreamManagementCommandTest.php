@@ -32,7 +32,7 @@ class UpstreamManagementCommandTest extends TestCase
         // rm -rf $this->sut
         //passthru();
         echo "Cloning DCM to $this->sut";
-        passthru('git clone git@github.com:pantheon-systems/drupal-composer-managed.git ' . $this->sut);
+        passthru('git clone https://github.com/pantheon-systems/drupal-composer-managed.git ' . $this->sut);
 
         // Run 'composer update'. This has two important impacts:
         // 1. The composer.lock file is created, which is necessary for the upstream dependency locking feature to work.
