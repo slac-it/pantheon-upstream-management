@@ -32,19 +32,16 @@ class UpstreamUpdateDependenciesCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('Hello World');
-
         $io = $this->getIO();
         $composer = $this->getComposer();
 
         // This command can only be used in custom upstreams
         $this->failUnlessIsCustomUpstream($io, $composer);
-        // @todo Path!?
         if (!file_exists("upstream-configuration/composer.json")) {
             $io->writeError(
                 "Upstream has no dependencies; use 'composer upstream-require drupal/modulename' to add some."
             );
-            return;
+            return 1;
         }
 
         // Ensure we have core/composer-recommended listed in the
@@ -53,7 +50,6 @@ class UpstreamUpdateDependenciesCommand extends BaseCommand
         $this->ensureCoreRecommended();
 
         // Generate or update our upstream-configuration/composer.lock file.
-        // @todo Path!?
         passthru("composer --working-dir=upstream-configuration update --no-install", $statusCode);
         if ($statusCode) {
             throw new \RuntimeException("Could not update upstream dependencies.");
@@ -64,5 +60,9 @@ class UpstreamUpdateDependenciesCommand extends BaseCommand
 
         // Change the project (top-level) composer.json to use the locked composer.json file.
         $this->useLockedUpstreamDependenciesInProjectComposerJson($io);
+
+        $io->write('Upstream dependencies updated.');
+
+        return 0;
     }
 }

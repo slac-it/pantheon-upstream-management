@@ -41,4 +41,5 @@ class UpstreamManagementPlugin implements PluginInterface, Capable
     }
 
     // @todo Do we need preUpdate and postUpdate hooks!? Anything for cleanup?
+    // @todo Remove upstream-require command as part of the plugin
 }

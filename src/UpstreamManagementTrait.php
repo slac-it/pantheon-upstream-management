@@ -71,7 +71,6 @@ trait UpstreamManagementTrait
             return;
         }
 
-        // @todo Path!?
         $upstreamComposerJsonContents = file_get_contents("upstream-configuration/composer.json");
         $upstreamComposerJson = json_decode($upstreamComposerJsonContents, true);
 
@@ -87,7 +86,6 @@ trait UpstreamManagementTrait
             $projectComposerJson['require']['drupal/core-recommended'];
 
         $upstreamComposerJsonContents = static::jsonEncodePretty($upstreamComposerJson);
-        // @todo Path!?
         file_put_contents("upstream-configuration/composer.json", $upstreamComposerJsonContents . PHP_EOL);
     }
 
@@ -101,7 +99,6 @@ trait UpstreamManagementTrait
      */
     protected function generateLockedComposerJson(IOInterface $io)
     {
-        // @todo Path!?
         if (!file_exists("upstream-configuration/composer.lock")) {
             $io->writeError("<warning>No locked dependencies in the upstream; skipping.</warning>");
             return;
@@ -118,8 +115,7 @@ trait UpstreamManagementTrait
             return;
         }
 
-        // @todo Probably not error.
-        $io->writeError('Locking upstream dependencies:');
+        $io->write('Locking upstream dependencies:');
 
         // Copy the 'packages' section from the Composer lock into our 'require'
         // section. There is also a 'packages-dev' section, but we do not need
@@ -131,16 +127,13 @@ trait UpstreamManagementTrait
             // or something else that we do not want to include.
             if (isset($package['source'])) {
                 $composerJson['require'][$package['name']] = $package['version'];
-                // @todo Probably not error.
-                $io->writeError('  "' . $package['name'] . '": "' . $package['version'] .'"');
+                $io->write('  "' . $package['name'] . '": "' . $package['version'] .'"');
             }
         }
 
         // Write the updated composer.json file
         $composerJsonContents = static::jsonEncodePretty($composerJson);
-        // @todo Path!?
         @mkdir("upstream-configuration/locked");
-        // @todo Path!?
         file_put_contents("upstream-configuration/locked/composer.json", $composerJsonContents . PHP_EOL);
     }
 
@@ -154,12 +147,10 @@ trait UpstreamManagementTrait
      */
     protected function useLockedUpstreamDependenciesInProjectComposerJson(IOInterface $io)
     {
-        // @todo Path!?
         if (!file_exists("upstream-configuration/locked/composer.json")) {
             $io->writeError("<warning>Dependencies are not locked in the upstream; skipping.</warning>");
         }
 
-        // @todo Path!?
         $composerJsonContents = file_get_contents("composer.json");
         $composerJson = json_decode($composerJsonContents, true);
 
@@ -167,7 +158,6 @@ trait UpstreamManagementTrait
 
         // Write the updated composer.json file
         $composerJsonContents = static::jsonEncodePretty($composerJson);
-        // @todo Path!?
         file_put_contents("composer.json", $composerJsonContents . PHP_EOL);
     }
 
@@ -217,5 +207,26 @@ trait UpstreamManagementTrait
         $prettyContents = preg_replace('#": \[\s*("[^"]*")\s*\]#m', '": [\1]', $prettyContents);
 
         return $prettyContents;
+    }
+
+    /**
+     * Flatten command options.
+     */
+    protected function flattenOptions(array $options)
+    {
+        $flattened = '';
+
+        foreach ($options as $key => $value) {
+            if (!$value) {
+                continue;
+            }
+            if (is_bool($value)) {
+                $flattened .= " --$key";
+            } else {
+                $flattened .= " --$key=$value";
+            }
+        }
+
+        return $flattened;
     }
 }

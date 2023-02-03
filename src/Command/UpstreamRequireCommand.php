@@ -2,7 +2,7 @@
 
 namespace PantheonSystems\UpstreamManagement\Command;
 
-use Composer\Command\BaseCommand;
+use Composer\Command\RequireCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use PantheonSystems\UpstreamManagement\UpstreamManagementTrait;
@@ -10,7 +10,7 @@ use PantheonSystems\UpstreamManagement\UpstreamManagementTrait;
 /**
  * The "upstream:require" command.
  */
-class UpstreamRequireCommand extends BaseCommand
+class UpstreamRequireCommand extends RequireCommand
 {
 
     use UpstreamManagementTrait;
@@ -20,6 +20,7 @@ class UpstreamRequireCommand extends BaseCommand
      */
     protected function configure()
     {
+        parent::configure();
         $this
             ->setName('upstream:require')
             ->setAliases(['upstream-require'])
@@ -32,41 +33,35 @@ class UpstreamRequireCommand extends BaseCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('Hello World');
         $io = $this->getIO();
         $composer = $this->getComposer();
-        $arguments = $this->getArguments();
+        $packages = $input->getArgument('packages');
+
+        $options = $input->getOptions();
 
         // This command can only be used in custom upstreams
         $this->failUnlessIsCustomUpstream($io, $composer);
-        $hasNoUpdate = array_search('--no-update', $arguments) !== false;
+        $hasNoUpdate = !empty($options['no-update']);
+
         // Remove --working-dir, --no-update and --no-install, if provided
-        $arguments = array_filter($arguments, function ($item) {
-            return
-            (substr($item, 0, 13) != '--working-dir') &&
-            ($item != '--no-update') &&
-            ($item != '--no-install');
-        });
-        // Escape the arguments passed in.
-        $args = array_map(function ($item) {
-            return escapeshellarg($item);
-        }, $arguments);
+        $options['working-dir'] = null;
+        $options['no-update'] = $options['no-install'] = false;
 
         // Run `require` with '--no-update' if there is no composer.lock file,
         // and without it if there is.
-        // @todo Path!?
         $addNoUpdate = $hasNoUpdate || !file_exists('upstream-configuration/composer.lock');
 
         if ($addNoUpdate) {
-            $args[] = '--no-update';
+            $options['no-update'] = true;
         } else {
-            $args[] = '--no-install';
+            $options['no-install'] = true;
         }
+
+        $options_string = $this->flattenOptions($options);
 
         // Insert the new projects into the upstream-configuration composer.json
         // without writing vendor & etc to the upstream-configuration directory.
-        // @todo Path!?
-        $cmd = "composer --working-dir=upstream-configuration require " . implode(' ', $args);
+        $cmd = "composer --working-dir=upstream-configuration require " . implode(' ', $packages) . $options_string;
         $io->writeError($cmd . PHP_EOL);
         passthru($cmd, $statusCode);
 
