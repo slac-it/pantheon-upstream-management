@@ -45,8 +45,9 @@ jobs:
         os:
           - ubuntu-latest
         php-version:
+          - php: "7.4"
+          - php: "8.0"
           - php: "8.1"
-          - php: "8.2"
         php-ini-values:
           - assert.exception=1, zend.assertions=1
       max-parallel: 3
