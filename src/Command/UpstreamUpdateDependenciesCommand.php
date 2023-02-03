@@ -10,7 +10,7 @@ use PantheonSystems\UpstreamManagement\UpstreamManagementTrait;
 /**
  * The "upstream:update-dependencies" command.
  */
-class UpdateUpstreamDependenciesCommand extends BaseCommand
+class UpstreamUpdateDependenciesCommand extends BaseCommand
 {
 
     use UpstreamManagementTrait;
