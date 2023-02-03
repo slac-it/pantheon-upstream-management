@@ -35,7 +35,11 @@ class UpstreamManagementCommandTest extends TestCase
         passthru('git clone https://github.com/pantheon-systems/drupal-composer-managed.git ' . $this->sut);
 
         // Override php version for this test.
-        $this->composer('config', ['platform.php', phpversion()]);
+        $this->pregReplaceSutFile(
+            '#php_version: 8.1#',
+            'php_version: ' . substr(phpversion(), 0, 3),
+            'pantheon.upstream.yml'
+        );
 
         // Run 'composer update'. This has two important impacts:
         // 1. The composer.lock file is created, which is necessary for the upstream dependency locking feature to work.
