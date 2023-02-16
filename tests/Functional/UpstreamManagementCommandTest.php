@@ -24,13 +24,10 @@ class UpstreamManagementCommandTest extends TestCase
 
     public function tearDown(): void
     {
-        //$this->cleaner->clean();
     }
 
     protected function createSut()
     {
-        // rm -rf $this->sut
-        //passthru();
         echo "Cloning DCM to $this->sut";
         passthru('git clone https://github.com/pantheon-systems/drupal-composer-managed.git ' . $this->sut);
 
@@ -88,7 +85,6 @@ class UpstreamManagementCommandTest extends TestCase
 
     public function testUpdateUpstreamDependencies()
     {
-        //$this->markTestSkipped("Test fails due to problem running shutdown handler in subprocess from phpunit");
         $this->createSut();
 
         $this->pregReplaceSutFile(
@@ -123,9 +119,9 @@ class UpstreamManagementCommandTest extends TestCase
         $this->assertTrue($process->isSuccessful(), $process->getOutput() . PHP_EOL . $process->getErrorOutput());
         $this->assertSutFileExists('upstream-configuration/composer.lock');
         $output = $process->getErrorOutput();
-        $process = $this->composer('info');
+        $process = $this->composer('info', ['--format=json']);
         $output = $process->getOutput();
-        $this->assertMatchesRegularExpression('#drupal/ctools *4\.0\.2#', $output);
+        $this->assertPackageVersionMatchesRegularExpression('drupal/ctools', '#4\.0\.2#', $output);
 
         // Set drupal/ctools constraint back to ^4. At this point, though, the
         // upstream dependency lock file is still at version 4.0.2.
@@ -147,38 +143,58 @@ class UpstreamManagementCommandTest extends TestCase
         $output = $process->getOutput() . PHP_EOL . $process->getErrorOutput();
         $this->assertStringNotContainsString('drupal/ctools (4.0.2 => 4.)', $output);
         $this->assertStringNotContainsString('No locked dependencies in the upstream', $output);
-        $process = $this->composer('info');
+        $process = $this->composer('info', ['--format=json']);
         $output = $process->getOutput();
         $this->assertTrue($process->isSuccessful());
-        $this->assertMatchesRegularExpression('#drupal/ctools *4\.0\.2#', $output);
+        $this->assertPackageVersionMatchesRegularExpression('drupal/ctools', '#4\.0\.2#', $output);
 
         // Update the upstream dependencies. This should not affect the installed dependencies;
         // however, it will update the locked version of drupal/ctools to the latest
         // avaiable version. The project will acquire this version the next time it is updated.
-        $this->composer('update-upstream-dependencies');
+        $process = $this->composer('update-upstream-dependencies');
         $this->assertTrue($process->isSuccessful(), $process->getOutput() . PHP_EOL . $process->getErrorOutput());
         $output = $process->getOutput() . PHP_EOL . $process->getErrorOutput();
-        $this->assertMatchesRegularExpression('#drupal/ctools *4\.0\.2#', $output);
-        $process = $this->composer('info');
+        $this->assertMatchesRegularExpression('#"drupal/ctools": "4\.0\.3"#', $output);
+        $process = $this->composer('info', ['--format=json']);
         $output = $process->getOutput();
         $this->assertTrue($process->isSuccessful());
-        $this->assertMatchesRegularExpression('#drupal/ctools *4\.0\.2#', $output);
+        $this->assertPackageVersionMatchesRegularExpression('drupal/ctools', '#4\.0\.2#', $output);
 
         // Now run `composer update` again. This should update drupal/ctools.
         $process = $this->composer('update');
         $this->assertTrue($process->isSuccessful(), $process->getOutput() . PHP_EOL . $process->getErrorOutput());
         $output = $process->getOutput() . PHP_EOL . $process->getErrorOutput();
         $this->assertStringNotContainsString('No locked dependencies in the upstream', $output);
-        $process = $this->composer('info');
+        $process = $this->composer('info', ['--format=json']);
         $output = $process->getOutput();
         $this->assertTrue($process->isSuccessful());
-        $this->assertMatchesRegularExpression('#drupal/ctools *4\.#', $output);
-        $this->assertDoesNotMatchRegularExpression('#drupal/ctools *4\.0\.2#', $output);
+        $this->assertPackageVersionMatchesRegularExpression('drupal/ctools', '#4\.#', $output);
+        $this->assertPackageVersionDoesNotMatchesRegularExpression('drupal/ctools', '#4\.0\.2#', $output);
     }
 
     public function sutFileContents($file)
     {
         return file_get_contents($this->sut . DIRECTORY_SEPARATOR . $file);
+    }
+
+    public function assertPackageVersionMatchesRegularExpression($packageName, $version, $jsonString) {
+        $data = json_decode($jsonString, TRUE);
+        foreach ($data['installed'] as $package) {
+            if ($package['name'] === $packageName) {
+                $this->assertMatchesRegularExpression($version, $package['version']);
+                return;
+            }
+        }
+    }
+
+    public function assertPackageVersionDoesNotMatchesRegularExpression($packageName, $version, $jsonString) {
+        $data = json_decode($jsonString, TRUE);
+        foreach ($data['installed'] as $package) {
+            if ($package['name'] === $packageName) {
+                $this->assertDoesNotMatchRegularExpression($version, $package['version']);
+                return;
+            }
+        }
     }
 
     public function assertSutFileContains($needle, $haystackFile)
