@@ -177,8 +177,9 @@ class UpstreamManagementCommandTest extends TestCase
         return file_get_contents($this->sut . DIRECTORY_SEPARATOR . $file);
     }
 
-    public function assertPackageVersionMatchesRegularExpression($packageName, $version, $jsonString) {
-        $data = json_decode($jsonString, TRUE);
+    public function assertPackageVersionMatchesRegularExpression($packageName, $version, $jsonString)
+    {
+        $data = json_decode($jsonString, true);
         foreach ($data['installed'] as $package) {
             if ($package['name'] === $packageName) {
                 $this->assertMatchesRegularExpression($version, $package['version']);
@@ -187,8 +188,9 @@ class UpstreamManagementCommandTest extends TestCase
         }
     }
 
-    public function assertPackageVersionDoesNotMatchesRegularExpression($packageName, $version, $jsonString) {
-        $data = json_decode($jsonString, TRUE);
+    public function assertPackageVersionDoesNotMatchesRegularExpression($packageName, $version, $jsonString)
+    {
+        $data = json_decode($jsonString, true);
         foreach ($data['installed'] as $package) {
             if ($package['name'] === $packageName) {
                 $this->assertDoesNotMatchRegularExpression($version, $package['version']);
