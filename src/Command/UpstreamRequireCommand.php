@@ -69,6 +69,10 @@ class UpstreamRequireCommand extends RequireCommand
             throw new \RuntimeException("Could not add dependency to upstream.");
         }
 
+        if (!$addNoUpdate) {
+          $this->generateLockedComposerJson($io);
+        }
+
         // @codingStandardsIgnoreLine
         $io->writeError('upstream-configuration/composer.json updated. Commit the upstream-configuration/composer.lock file if you wish to lock your upstream dependency versions in sites created from this upstream.');
         return $statusCode;
