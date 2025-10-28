@@ -1,7 +1,9 @@
 name: Notify Satis Repo on Branch Update
 
 on:
-  create
+  push:
+    branches:
+      - 'slac-main'
 
 jobs:
   notify-satis:
